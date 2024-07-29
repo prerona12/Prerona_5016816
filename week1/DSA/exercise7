@@ -1,0 +1,24 @@
+//Exercise 7: Financial Forecasting
+public class FinancialForecast {
+
+    
+    public static double calculateFutureValue(double currentValue, double growthRate, int years) {
+        
+        if (years == 0) {
+            return currentValue;
+        }
+        // Recursive case
+        return calculateFutureValue(currentValue * (1 + growthRate), growthRate, years - 1);
+    }
+
+    public static void main(String[] args) {
+        double currentValue = 1000.0;  
+        double growthRate = 0.05;      // Example growth rate (5%)
+        int years = 10;                
+
+        double futureValue = calculateFutureValue(currentValue, growthRate, years);
+
+        System.out.println("The future value after " + years + " years is: " + futureValue);
+        System.out.println("**********************");
+    }
+}
