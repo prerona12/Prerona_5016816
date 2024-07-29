@@ -1,0 +1,142 @@
+//Exercise 4: Employee Management System
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class EmployeeManagement {
+    private ArrayList<Employee> employees = new ArrayList<>();
+    private Scanner scanner = new Scanner(System.in);
+
+    private boolean checkEmployee(int employeeId) {
+        for (Employee employee : employees) {
+            if (employee.id == employeeId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void addEmployee() {
+        System.out.print("Enter Employee Id: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        if (checkEmployee(id)) {
+            System.out.println("Employee already exists. Please try again.");
+            return;
+        }
+
+        System.out.print("Enter Employee Name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter Employee Position: ");
+        String position = scanner.nextLine();
+        System.out.print("Enter Employee Salary: ");
+        float salary = Float.parseFloat(scanner.nextLine());
+
+        employees.add(new Employee(id, name, position, salary));
+        System.out.println("Employee Added Successfully");
+    }
+
+    private void removeEmployee() {
+        System.out.print("Enter Employee Id: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        if (!checkEmployee(id)) {
+            System.out.println("Employee does not exist. Please try again.");
+            return;
+        }
+
+        employees.removeIf(employee -> employee.id == id);
+        System.out.println("Employee Removed Successfully");
+    }
+
+    private void promoteEmployee() {
+        System.out.print("Enter Employee's Id: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        if (!checkEmployee(id)) {
+            System.out.println("Employee does not exist. Please try again.");
+            return;
+        }
+
+        try {
+            System.out.print("Enter increase in Salary: ");
+            float amount = Float.parseFloat(scanner.nextLine());
+
+            for (Employee employee : employees) {
+                if (employee.id == id) {
+                    employee.salary += amount;
+                    System.out.println("Employee Promoted Successfully");
+                    break;
+                }
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid number for the salary increase.");
+        }
+    }
+
+    private void displayEmployees() {
+        for (Employee employee : employees) {
+            System.out.println(employee);
+            System.out.println("------------------------------------");
+        }
+    }
+
+    private void menu() {
+        while (true) {
+            System.out.println("\nWelcome to Employee Management Record");
+            System.out.println("************************************************");
+            System.out.println("Press:");
+            System.out.println("1 to Add Employee");
+            System.out.println("2 to Remove Employee");
+            System.out.println("3 to Promote Employee");
+            System.out.println("4 to Display Employees");
+            System.out.println("5 to Exit");
+
+            System.out.print("Enter your Choice: ");
+            String choice = scanner.nextLine();
+
+            switch (choice) {
+                case "1":
+                    addEmployee();
+                    break;
+                case "2":
+                    removeEmployee();
+                    break;
+                case "3":
+                    promoteEmployee();
+                    break;
+                case "4":
+                    displayEmployees();
+                    break;
+                case "5":
+                    System.out.println("Exiting the program. Goodbye!");
+                    return;
+                default:
+                    System.out.println("Invalid Choice! Please try again.");
+                    break;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        EmployeeManagement management = new EmployeeManagement();
+        management.menu();
+    }
+}
+
+
+class Employee {
+    int id;
+    String name;
+    String position;
+    float salary;
+
+    Employee(int id, String name, String position, float salary) {
+        this.id = id;
+        this.name = name;
+        this.position = position;
+        this.salary = salary;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee Id: " + id + ", Name: " + name + ", Position: " + position + ", Salary: " + salary;
+    }
+}
+
