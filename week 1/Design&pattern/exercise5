@@ -1,0 +1,65 @@
+//Exercise 5: Implementing the Decorator Pattern
+
+// Notification.java
+public interface Notification {
+    String send();
+}
+// BasicNotification.java
+public class BasicNotification implements Notification {
+    @Override
+    public String send() {
+        return "Sending notification";
+    }
+}
+// NotificationDecorator.java
+public abstract class NotificationDecorator implements Notification {
+    protected Notification decoratedNotification;
+
+    public NotificationDecorator(Notification decoratedNotification) {
+        this.decoratedNotification = decoratedNotification;
+    }
+
+    @Override
+    public String send() {
+        return decoratedNotification.send();
+    }
+}
+// EmailNotificationDecorator.java
+public class EmailNotificationDecorator extends NotificationDecorator {
+    public EmailNotificationDecorator(Notification decoratedNotification) {
+        super(decoratedNotification);
+    }
+
+    @Override
+    public String send() {
+        return decoratedNotification.send() + " via Email";
+    }
+}
+
+// SmsNotificationDecorator.java
+public class SmsNotificationDecorator extends NotificationDecorator {
+    public SmsNotificationDecorator(Notification decoratedNotification) {
+        super(decoratedNotification);
+    }
+
+    @Override
+    public String send() {
+        return decoratedNotification.send() + " via SMS";
+    }
+}
+// Main.java
+public class Main {
+    public static void main(String[] args) {
+        // Basic Notification
+        Notification notification = new BasicNotification();
+        System.out.println(notification.send());
+
+        // Email Notification
+        Notification emailNotification = new EmailNotificationDecorator(new BasicNotification());
+        System.out.println(emailNotification.send());
+
+        // SMS and Email Notification
+        Notification smsEmailNotification = new SmsNotificationDecorator(new EmailNotificationDecorator(new BasicNotification()));
+        System.out.println(smsEmailNotification.send());
+    }
+}
