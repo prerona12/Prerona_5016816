@@ -1,3 +1,17 @@
+//Exercise 3: Implementing the Builder Pattern
+
+public class BuilderPatternExample {
+    public static void main(String[] args) {
+        GamingComputerBuilder gamingBuilder = new GamingComputerBuilder();
+        ComputerDirector director = new ComputerDirector();
+
+        director.construct(gamingBuilder);
+        Computer gamingComputer = gamingBuilder.getResult();
+
+        gamingComputer.displayInfo();
+    }
+}
+
 class Computer {
     private String cpu;
     private String ram;
@@ -61,7 +75,7 @@ class GamingComputerBuilder implements Builder {
     }
 }
 
-// Director
+
 class ComputerDirector {
     public void construct(Builder builder) {
         builder.buildCPU();
@@ -70,15 +84,3 @@ class ComputerDirector {
     }
 }
 
-// Client
-public class BuilderPatternExample {
-    public static void main(String[] args) {
-        GamingComputerBuilder gamingBuilder = new GamingComputerBuilder();
-        ComputerDirector director = new ComputerDirector();
-
-        director.construct(gamingBuilder);
-        Computer gamingComputer = gamingBuilder.getResult();
-
-        gamingComputer.displayInfo();
-    }
-}
