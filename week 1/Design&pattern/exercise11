@@ -1,0 +1,80 @@
+//Exercise 11: Implementing Dependency Injection
+
+
+public class DependencyInjectionExample {
+    public static void main(String[] args) {
+        // Create an instance of CustomerRepository
+        CustomerRepository customerRepository = new CustomerRepositoryImpl();
+
+        // Create an instance of CustomerService with dependency injection
+        CustomerService customerService = new CustomerService(customerRepository);
+
+        // Find and display customer
+        Customer customer = customerService.getCustomerById("123");
+        if (customer != null) {
+            System.out.println(customer);
+        } else {
+            System.out.println("Customer not found");
+        }
+    }
+}
+interface CustomerRepository {
+    Customer findCustomerById(String id);
+}
+
+
+class CustomerRepositoryImpl implements CustomerRepository {
+    @Override
+    public Customer findCustomerById(String id) {
+        
+        if ("123".equals(id)) {
+            return new Customer("123", "John Doe", "john.doe@example.com");
+        }
+        return null;
+    }
+}
+
+
+class CustomerService {
+    private CustomerRepository customerRepository;
+
+    // Constructor Injection
+    public CustomerService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
+
+    public Customer getCustomerById(String id) {
+        return customerRepository.findCustomerById(id);
+    }
+}
+
+
+class Customer {
+    private String id;
+    private String name;
+    private String email;
+
+    public Customer(String id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    @Override
+    public String toString() {
+        return "Customer ID: " + id + ", Name: " + name + ", Email: " + email;
+    }
+}
+
