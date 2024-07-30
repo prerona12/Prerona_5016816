@@ -1,0 +1,76 @@
+//Exercise 4: Implementing the Adapter Pattern
+
+
+public interface PaymentGateway {
+    void processPayment(double amount);
+}
+
+public interface PayPal {
+    void makePayment(double amount);
+}
+
+class PayPalImpl implements PayPal {
+    @Override
+    public void makePayment(double amount) {
+        // PayPal-specific payment processing logic
+        System.out.println("Paid $" + amount + " via PayPal.");
+    }
+}
+public interface Stripe {
+    void charge(double amount);
+}
+
+class StripeImpl implements Stripe {
+    @Override
+    public void charge(double amount) {
+        // Stripe-specific payment processing logic
+        System.out.println("Charged $" + amount + " using Stripe.");
+    }
+}
+class PayPalAdapter implements PaymentGateway {
+    private PayPal paymentGateway;
+
+    public PayPalAdapter(PayPal paymentGateway) {
+        this.paymentGateway = paymentGateway;
+    }
+
+    @Override
+    public void processPayment(double amount) {
+        // Convert our application's method to PayPal's method
+        paymentGateway.makePayment(amount);
+    }
+}
+class StripeAdapter implements PaymentGateway {
+    private Stripe paymentGateway;
+
+    public StripeAdapter(Stripe paymentGateway) {
+        this.paymentGateway = paymentGateway;
+    }
+
+    @Override
+    public void processPayment(double amount) {
+        // Convert our application's method to Stripe's method
+        paymentGateway.charge(amount);
+    }
+}
+public class PaymentApp {
+    public static void main(String[] args) {
+        // Creating instances of PayPal and Stripe
+        PayPal paypal = new PayPalImpl();
+        Stripe stripe = new StripeImpl();
+
+        // Adapting the external payment gateways to our PaymentGateway interface
+        PaymentGateway paypalGateway = new PayPalAdapter(paypal);
+        PaymentGateway stripeGateway = new StripeAdapter(stripe);
+
+        double amount = 100.0;
+
+        // Process payments using different payment gateways
+        System.out.println("Processing payment via PayPal:");
+        paypalGateway.processPayment(amount);
+
+        System.out.println("Processing payment via Stripe:");
+        stripeGateway.processPayment(amount);
+    }
+}
+
