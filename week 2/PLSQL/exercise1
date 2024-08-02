@@ -1,0 +1,83 @@
+// PL SQL CODE
+// Scenario 1: The bank wants to apply a discount to loan interest rates for customers above 60 years old.
+DECLARE
+    CURSOR customer_cursor IS
+        SELECT customer_id, age, loan_interest_rate
+        FROM customers
+        FOR UPDATE OF loan_interest_rate;
+        
+    customer_record customer_cursor%ROWTYPE;
+    
+BEGIN
+    FOR customer_record IN customer_cursor LOOP
+        IF customer_record.age > 60 THEN
+            UPDATE customers
+            SET loan_interest_rate = loan_interest_rate * 0.99
+            WHERE CURRENT OF customer_cursor;
+        END IF;
+    END LOOP;
+    
+    COMMIT;
+END;
+/
+
+
+
+//Scenario 2: A customer can be promoted to VIP status based on their balance.
+
+DECLARE
+    CURSOR customer_cursor IS
+        SELECT customer_id, balance, IsVIP
+        FROM customers
+        WHERE IsVIP = 'FALSE'
+        FOR UPDATE OF IsVIP;
+        
+    customer_record customer_cursor%ROWTYPE;
+    
+BEGIN
+    FOR customer_record IN customer_cursor LOOP
+        IF customer_record.balance > 10000 THEN
+            UPDATE customers
+            SET IsVIP = 'TRUE'
+            WHERE CURRENT OF customer_cursor;
+        END IF;
+    END LOOP;
+    
+    COMMIT;
+END;
+/
+
+
+
+//Scenario 3: The bank wants to send reminders to customers whose loans are due within the next 30 days.
+
+DECLARE
+    CURSOR loan_cursor IS
+        SELECT loan_id, customer_id, due_date, amount
+        FROM loans
+        WHERE due_date BETWEEN SYSDATE AND SYSDATE + 30;
+        
+    loan_record loan_cursor%ROWTYPE;
+    
+    customer_name VARCHAR2(100);
+    
+BEGIN
+    FOR loan_record IN loan_cursor LOOP
+        -- Fetch the customer name (assuming there's a customers table)
+        SELECT name INTO customer_name
+        FROM customers
+        WHERE customer_id = loan_record.customer_id;
+        
+        -- Print reminder message
+        DBMS_OUTPUT.PUT_LINE('Reminder: Customer ' || customer_name || 
+                             ' (ID: ' || loan_record.customer_id || 
+                             '), your loan (ID: ' || loan_record.loan_id || 
+                             ') of amount $' || loan_record.amount || 
+                             ' is due on ' || TO_CHAR(loan_record.due_date, 'YYYY-MM-DD') || '.');
+    END LOOP;
+    
+    -- Enable DBMS_OUTPUT in case it's not enabled
+    EXECUTE IMMEDIATE 'BEGIN DBMS_OUTPUT.ENABLE(NULL); END;';
+    
+END;
+/
