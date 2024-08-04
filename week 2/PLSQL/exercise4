@@ -1,0 +1,137 @@
+--Exercise 4: Functions
+--Scenario 1: Calculate the age of customers for eligibility checks.
+--Question: Write a function CalculateAge that takes a customer's date of birth as input and returns their age in years.
+
+
+--Scenario 2: The bank needs to compute the monthly installment for a loan.
+--Question: Write a function CalculateMonthlyInstallment that takes the loan amount, interest rate, and loan duration in years as input and returns the monthly installment amount.
+
+
+CREATE TABLE loans (
+    loan_id NUMBER PRIMARY KEY,
+    customer_id NUMBER,
+    loan_amount NUMBER,
+    annual_interest_rate NUMBER,
+    loan_duration_years NUMBER
+);
+INSERT INTO loans (loan_id, customer_id, loan_amount, annual_interest_rate, loan_duration_years) VALUES
+(1, 101, 10000, 5, 3),
+(2, 102, 50000, 4.5, 10),
+(3, 103, 20000, 6, 5);
+CREATE OR REPLACE FUNCTION CalculateMonthlyInstallment(
+    p_loan_amount NUMBER,
+    p_annual_interest_rate NUMBER,
+    p_loan_duration_years NUMBER
+) RETURN NUMBER IS
+    v_monthly_interest_rate NUMBER;
+    v_number_of_payments NUMBER;
+    v_monthly_installment NUMBER;
+BEGIN
+    v_monthly_interest_rate := (p_annual_interest_rate / 100) / 12;
+    v_number_of_payments := p_loan_duration_years * 12;
+    
+    IF v_monthly_interest_rate > 0 THEN
+        v_monthly_installment := p_loan_amount * 
+            (v_monthly_interest_rate * POWER(1 + v_monthly_interest_rate, v_number_of_payments)) / 
+            (POWER(1 + v_monthly_interest_rate, v_number_of_payments) - 1);
+    ELSE
+        v_monthly_installment := p_loan_amount / v_number_of_payments;
+    END IF;
+
+    RETURN v_monthly_installment;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE CalculateInstallmentsForAllLoans IS
+    CURSOR loan_cursor IS
+        SELECT loan_id, loan_amount, annual_interest_rate, loan_duration_years
+        FROM loans;
+        
+    v_monthly_installment NUMBER;
+BEGIN
+    FOR loan_record IN loan_cursor LOOP
+        v_monthly_installment := CalculateMonthlyInstallment(
+            loan_record.loan_amount,
+            loan_record.annual_interest_rate,
+            loan_record.loan_duration_years
+        );
+        
+        DBMS_OUTPUT.PUT_LINE('Loan ID: ' || loan_record.loan_id || 
+                             ', Monthly Installment: ' || v_monthly_installment);
+    END LOOP;
+END;
+/
+-- Enable output
+SET SERVEROUTPUT ON;
+
+-- Execute the procedure to calculate and display monthly installments
+BEGIN
+    CalculateInstallmentsForAllLoans;
+END;
+/
+
+
+--Scenario 3: Check if a customer has sufficient balance before making a transaction.
+--Question: Write a function HasSufficientBalance that takes an account ID and an amount as input and returns a boolean indicating whether the account has at least the specified amount.
+
+
+CREATE TABLE customers (
+    customer_id NUMBER PRIMARY KEY,
+    name VARCHAR2(100),
+    balance NUMBER
+);
+
+-- Insert sample data into the customers table
+INSERT INTO customers (customer_id, name, balance) VALUES (1, 'John Doe', 5000);
+INSERT INTO customers (customer_id, name, balance) VALUES (2, 'Jane Smith', 3000);
+INSERT INTO customers (customer_id, name, balance) VALUES (3, 'Alice Johnson', 7000);
+INSERT INTO customers (customer_id, name, balance) VALUES (4, 'Bob Brown', 2000);
+CREATE OR REPLACE FUNCTION HasSufficientBalance(
+    p_account_id NUMBER,
+    p_amount NUMBER
+) RETURN BOOLEAN IS
+    v_balance NUMBER;
+BEGIN
+    -- Fetch the balance for the given account ID
+    SELECT balance
+    INTO v_balance
+    FROM customers
+    WHERE customer_id = p_account_id;
+    
+    -- Check if the balance is sufficient
+    IF v_balance >= p_amount THEN
+        RETURN TRUE;
+    ELSE
+        RETURN FALSE;
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        -- Handle case where account ID does not exist
+        RETURN FALSE;
+    WHEN OTHERS THEN
+        -- Handle any other unexpected errors
+        RETURN FALSE;
+END;
+/
+DECLARE
+    v_has_balance BOOLEAN;
+BEGIN
+    -- Test the function with an example account ID and amount
+    v_has_balance := HasSufficientBalance(1, 4500);
+    
+    IF v_has_balance THEN
+        DBMS_OUTPUT.PUT_LINE('The account has sufficient balance.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('The account does not have sufficient balance.');
+    END IF;
+    
+    -- Test with another account
+    v_has_balance := HasSufficientBalance(2, 3500);
+    
+    IF v_has_balance THEN
+        DBMS_OUTPUT.PUT_LINE('The account has sufficient balance.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('The account does not have sufficient balance.');
+    END IF;
+END;
+/
