@@ -1,27 +1,6 @@
-// PL SQL CODE
-// Scenario 1: The bank wants to apply a discount to loan interest rates for customers above 60 years old.
+-- PL SQL CODE
+-- Scenario 1: The bank wants to apply a discount to loan interest rates for customers above 60 years old.
 
-CREATE TABLE customers (
-    customer_id NUMBER PRIMARY KEY,
-    name VARCHAR2(100),
-    age NUMBER,
-    balance NUMBER,
-    loan_interest_rate NUMBER,
-    is_vip CHAR(1)
-);
-
--- Insert sample data into the customers table
-INSERT INTO customers (customer_id, name, age, balance, loan_interest_rate, is_vip)
-VALUES (1, 'John Doe', 65, 15000, 5.0, 'N');
-INSERT INTO customers (customer_id, name, age, balance, loan_interest_rate, is_vip)
-VALUES (2, 'Jane Smith', 58, 8000, 4.5, 'N');
-INSERT INTO customers (customer_id, name, age, balance, loan_interest_rate, is_vip)
-VALUES (3, 'Alice Johnson', 70, 12000, 3.8, 'N');
-INSERT INTO customers (customer_id, name, age, balance, loan_interest_rate, is_vip)
-VALUES (4, 'Bob Brown', 45, 3000, 6.0, 'N');
-
--- PL/SQL Block to apply a 1% discount to loan interest rates for customers above 60 years old
--- PL/SQL Block to apply a 1% discount to loan interest rates for customers above 60 years old
 DECLARE
     CURSOR customer_cursor IS
         SELECT customer_id, name, age, loan_interest_rate
@@ -52,7 +31,7 @@ SET SERVEROUTPUT ON;
 
 
 
-//Scenario 2: A customer can be promoted to VIP status based on their balance.
+--Scenario 2: A customer can be promoted to VIP status based on their balance.
 
 DECLARE
     CURSOR customer_cursor IS
@@ -78,7 +57,7 @@ END;
 
 
 
-//Scenario 3: The bank wants to send reminders to customers whose loans are due within the next 30 days.
+--Scenario 3: The bank wants to send reminders to customers whose loans are due within the next 30 days.
 
 DECLARE
     CURSOR loan_cursor IS
