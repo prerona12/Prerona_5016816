@@ -1,0 +1,69 @@
+package com.example.bookstore.controller;
+
+import com.example.bookstore.model.Book;
+import com.example.bookstore.repository.BookRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+public class BookControllerIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private BookRepository bookRepository;
+
+    private Book book;
+
+    @BeforeEach
+    public void setUp() {
+        book = new Book();
+        book.setTitle("Effective Java");
+        book.setAuthor("Joshua Bloch");
+        book.setPrice(45.00);
+        bookRepository.save(book);
+    }
+
+    @Test
+    public void testGetAllBooks() throws Exception {
+        mockMvc.perform(get("/books"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").value("Effective Java"));
+    }
+
+    @Test
+    public void testGetBookById() throws Exception {
+        mockMvc.perform(get("/books/{id}", book.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Effective Java"));
+    }
+
+    @Test
+    public void testCreateBook() throws Exception {
+        String newBookJson = "{\"title\":\"Clean Code\",\"author\":\"Robert C. Martin\",\"price\":40.00}";
+
+        mockMvc.perform(post("/books")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(newBookJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Clean Code"));
+    }
+
+    @Test
+    public void testDeleteBook() throws Exception {
+        mockMvc.perform(delete("/books/{id}", book.getId()))
+                .andExpect(status().isNoContent());
+    }
+}

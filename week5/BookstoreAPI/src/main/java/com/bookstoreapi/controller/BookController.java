@@ -1,78 +1,77 @@
-package com.example.bookstoreapi.controller;
+package com.example.bookstore.controller;
 
-import com.example.bookstoreapi.model.Book;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import com.example.bookstore.model.Book;
+import com.example.bookstore.service.BookService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/books")
 public class BookController {
 
-    private List<Book> books = new ArrayList<>();
+    @Autowired
+    private BookService bookService;
 
-    // GET: Retrieve all books
     @GetMapping
-    @ResponseStatus(HttpStatus.OK) // Customize status code to 200 OK
-    public ResponseEntity<List<Book>> getAllBooks() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Custom-Header", "GetAllBooksHeader");
-        return new ResponseEntity<>(books, headers, HttpStatus.OK);
+    public List<Book> getAllBooks() {
+        return bookService.getAllBooks();
     }
 
-    // POST: Add a new book
+    @GetMapping("/{id}")
+    public ResponseEntity<Book> getBookById(@PathVariable Long id) {
+        return ResponseEntity.ok(bookService.getBookById(id));
+    }
+
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED) // Customize status code to 201 Created
-    public ResponseEntity<Book> addBook(@RequestBody Book book) {
-        books.add(book);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Custom-Header", "BookCreatedHeader");
-        return new ResponseEntity<>(book, headers, HttpStatus.CREATED);
+    public Book createBook(@RequestBody Book book) {
+        return bookService.createBook(book);
     }
 
-    // PUT: Update an existing book
-    @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK) // Customize status code to 200 OK
-    public ResponseEntity<Book> updateBook(@PathVariable("id") Long id, @RequestBody Book updatedBook) {
-        for (Book book : books) {
-            if (book.getId().equals(id)) {
-                book.setTitle(updatedBook.getTitle());
-                book.setAuthor(updatedBook.getAuthor());
-                book.setPrice(updatedBook.getPrice());
-                book.setIsbn(updatedBook.getIsbn());
-                HttpHeaders headers = new HttpHeaders();
-                headers.add("Custom-Header", "BookUpdatedHeader");
-                return new ResponseEntity<>(book, headers, HttpStatus.OK);
-            }
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Return 404 Not Found if the book doesn't exist
-    }
-
-     @GetMapping("/{id}")
-    public ResponseEntity<Book> getBookById(@PathVariable("id") Long id) {
-        Optional<Book> book = books.stream().filter(b -> b.getId().equals(id)).findFirst();
-        if (book.isPresent()) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Custom-Header", "BookFoundHeader");
-            return new ResponseEntity<>(book.get(), headers, HttpStatus.OK);
-        } else {
-            throw new ResourceNotFoundException("Book not found with ID: " + id);
-        }
-    }
-
-    // DELETE: Remove a book by ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable("id") Long id) {
-        boolean removed = books.removeIf(book -> book.getId().equals(id));
-        if (!removed) {
-            throw new ResourceNotFoundException("Book not found with ID: " + id);
-        }
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Custom-Header", "BookDeletedHeader");
-        return new ResponseEntity<>(headers, HttpStatus.NO_CONTENT);
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+        bookService.deleteBook(id);
+        return ResponseEntity.noContent().build();
+ @Autowired
+    private BookService bookService;
+
+    @Operation(summary = "Get all books", description = "Retrieve all books from the bookstore")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved books",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Book.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping
+    public List<Book> getAllBooks() {
+        return bookService.getAllBooks();
+    }
+
+    @Operation(summary = "Get a book by ID", description = "Retrieve a specific book by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the book",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Book.class))}),
+            @ApiResponse(responseCode = "404", description = "Book not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/{id}")
+    public Book getBookById(@PathVariable Long id) {
+        return bookService.getBookById(id);
+    }
+
+    @Operation(summary = "Add a new book", description = "Create a new book entry in the bookstore")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully created the book",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Book.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping
+    public Book addBook(@RequestBody Book book) {
+        return bookService.addBook(book);
+    }
 }
+
